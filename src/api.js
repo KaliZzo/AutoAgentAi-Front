@@ -50,16 +50,116 @@ export const carAPI = {
 
 // Maintenance API calls
 export const maintenanceAPI = {
-  addMaintenance: (maintenanceData) =>
-    api.post("/maintenance/addMaintenance", maintenanceData),
+  getAllMaintenanceRecords: () =>
+    api.get("/maintenance/getAllMaintenanceRecords"),
   getMaintenanceRecords: (carId) =>
     api.get(`/maintenance/getMaintenanceRecords/${carId}`),
-  updateMaintenance: (maintenanceId, data) =>
-    api.put(`/maintenance/updateMaintenance/${maintenanceId}`, data),
+  addMaintenance: (maintenanceData) =>
+    api.post("/maintenance/addMaintenance", maintenanceData),
+  updateMaintenance: (maintenanceId, maintenanceData) =>
+    api.put(`/maintenance/updateMaintenance/${maintenanceId}`, maintenanceData),
   deleteMaintenance: (maintenanceId) =>
     api.delete(`/maintenance/deleteMaintenance/${maintenanceId}`),
-  addToCalendar: (maintenanceId) =>
-    api.post(`/maintenance/${maintenanceId}/add-to-calendar`),
+  getGoogleAuthUrl: async () => {
+    const token = localStorage.getItem("token")
+    const response = await api.get("/calendar/auth", {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    return response.data.url
+  },
+  addToCalendar: async (maintenance) => {
+    const token = localStorage.getItem("token")
+
+    try {
+      // 1. קבלת URL הרשאה
+      const authUrl = await maintenanceAPI.getGoogleAuthUrl()
+
+      // 2. פתיחת חלון אותנטיקציה
+      const authWindow = window.open(
+        authUrl,
+        "Google Calendar Authorization",
+        "width=600,height=600"
+      )
+
+      return new Promise((resolve, reject) => {
+        const handleMessage = async (messageEvent) => {
+          if (messageEvent.origin !== window.location.origin) return
+
+          if (
+            messageEvent.data.type === "GOOGLE_AUTH_SUCCESS" &&
+            messageEvent.data.code
+          ) {
+            window.removeEventListener("message", handleMessage)
+
+            try {
+              // 3. קבלת טוקנים מהקוד
+              const tokensResponse = await api.get(
+                `/calendar/auth/callback?code=${messageEvent.data.code}`,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              )
+
+              // 4. יצירת אובייקט האירוע
+              const calendarEvent = {
+                summary: `Car Maintenance: ${maintenance.maintenanceType}`,
+                description: maintenance.notes || "Scheduled Maintenance",
+                start: {
+                  dateTime: new Date(maintenance.dateScheduled).toISOString(),
+                  timeZone: "Asia/Jerusalem",
+                },
+                end: {
+                  dateTime: new Date(
+                    new Date(maintenance.dateScheduled).getTime() +
+                      60 * 60 * 1000
+                  ).toISOString(),
+                  timeZone: "Asia/Jerusalem",
+                },
+                tokens: tokensResponse.data,
+              }
+
+              // הוספת לוגים לדיבוג
+              console.log("Calendar Event:", calendarEvent)
+
+              // 5. הוספת האירוע
+              const response = await api.post(
+                "/calendar/add-event",
+                calendarEvent,
+                {
+                  headers: { Authorization: `Bearer ${token}` },
+                }
+              )
+
+              if (authWindow) {
+                try {
+                  authWindow.close()
+                } catch (windowError) {
+                  console.warn("Could not close auth window")
+                }
+              }
+
+              resolve(response.data)
+            } catch (err) {
+              if (authWindow) {
+                try {
+                  authWindow.close()
+                } catch (windowError) {
+                  console.warn("Could not close auth window")
+                }
+              }
+              reject(err)
+            }
+          }
+        }
+
+        window.addEventListener("message", handleMessage)
+      })
+    } catch (error) {
+      throw error
+    }
+  },
+  getMaintenanceById: (maintenanceId) =>
+    api.get(`/maintenance/getMaintenance/${maintenanceId}`),
 }
 
 // Google Calendar API calls

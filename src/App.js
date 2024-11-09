@@ -14,6 +14,14 @@ import AddCar from "./components/cars/AddCar"
 import UpdateCar from "./components/cars/UpdateCar"
 import CarDetails from "./components/cars/CarDetalis"
 
+// Import Maintenance Components
+import MaintenanceList from "./components/maintenance/MaintenanceList"
+import AddMaintenance from "./components/maintenance/AddMaintenance"
+import UpdateMaintenance from "./components/maintenance/UpdateMaintenance"
+
+// Import Google Auth Callback Component
+import GoogleAuthCallback from "./components/maintenance/GoogleAuthCallback"
+
 function App() {
   return (
     <Router>
@@ -36,12 +44,26 @@ function App() {
             </PrivateRoute>
           }
         >
-          {/* Cars Routes - These will render inside the DashboardPage's Outlet */}
+          {/* Cars Routes */}
           <Route path="cars" element={<CarList />} />
           <Route path="cars/add" element={<AddCar />} />
           <Route path="cars/update/:carId" element={<UpdateCar />} />
           <Route path="cars/:carId" element={<CarDetails />} />
+
+          {/* Maintenance Routes */}
+          <Route path="maintenance/add" element={<AddMaintenance />} />
+          <Route path="maintenance/:carId" element={<MaintenanceList />} />
+          <Route
+            path="maintenance/update/:maintenanceId"
+            element={<UpdateMaintenance />}
+          />
         </Route>
+
+        {/* Google Auth Callback Route - עדכון הנתיב להתאמה מדויקת */}
+        <Route
+          path="/api/v1/calendar/auth/callback"
+          element={<GoogleAuthCallback />}
+        />
       </Routes>
     </Router>
   )

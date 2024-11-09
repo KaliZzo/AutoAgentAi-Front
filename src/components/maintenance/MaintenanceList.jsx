@@ -1,69 +1,190 @@
-import React from "react"
+import React, { useState, useEffect } from "react"
+import { Link, useParams } from "react-router-dom"
+import {
+  PencilIcon,
+  TrashIcon,
+  CalendarIcon,
+  ClockIcon,
+} from "@heroicons/react/24/outline"
+import { toast } from "react-hot-toast"
+import { maintenanceAPI } from "../../api"
+import { carAPI } from "../../api"
 
-const MaintenanceList = ({
-  records,
-  onDelete,
-  onEdit,
-  onAddToCalendar,
-  loading,
-}) => {
-  if (loading) {
-    return <div className="text-center py-4">Loading...</div>
+const MaintenanceList = () => {
+  const { carId } = useParams()
+  const [selectedCarId, setSelectedCarId] = useState(carId || "all")
+  const [cars, setCars] = useState([])
+  const [maintenanceRecords, setMaintenanceRecords] = useState([])
+  const [isLoading, setIsLoading] = useState(true)
+
+  // Fetch cars when component mounts
+  useEffect(() => {
+    const fetchCars = async () => {
+      try {
+        const response = await carAPI.getAllCars()
+        setCars(response.data.cars)
+      } catch (error) {
+        toast.error("Failed to fetch cars")
+      }
+    }
+    fetchCars()
+  }, [])
+
+  // Fetch maintenance records when selectedCarId changes
+  useEffect(() => {
+    fetchMaintenanceRecords()
+  }, [selectedCarId])
+
+  const fetchMaintenanceRecords = async () => {
+    try {
+      setIsLoading(true)
+      const response =
+        selectedCarId === "all"
+          ? await maintenanceAPI.getAllMaintenanceRecords()
+          : await maintenanceAPI.getMaintenanceRecords(selectedCarId)
+      setMaintenanceRecords(response.data.records)
+    } catch (error) {
+      toast.error("Failed to fetch maintenance records")
+    } finally {
+      setIsLoading(false)
+    }
   }
 
-  if (!records.length) {
-    return <div className="text-center py-4">No maintenance records found.</div>
+  const handleDelete = async (maintenanceId) => {
+    if (
+      window.confirm("Are you sure you want to delete this maintenance record?")
+    ) {
+      try {
+        await maintenanceAPI.deleteMaintenance(maintenanceId)
+        toast.success("Maintenance record deleted successfully")
+        fetchMaintenanceRecords()
+      } catch (error) {
+        toast.error("Failed to delete maintenance record")
+      }
+    }
+  }
+
+  const handleAddToCalendar = async (maintenance) => {
+    try {
+      setIsLoading(true)
+      const result = await maintenanceAPI.addToCalendar(maintenance)
+      toast.success("Successfully added to Google Calendar")
+    } catch (error) {
+      console.error("Calendar error:", error)
+      toast.error(error.message || "Failed to add to calendar")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center py-8">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+      </div>
+    )
   }
 
   return (
     <div className="space-y-4">
-      {records.map((record) => (
-        <div
-          key={record._id}
-          className="bg-gray-900 rounded-lg p-4 border border-gray-800"
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center gap-4">
+          <h2 className="text-2xl text-white font-light">
+            Maintenance Records
+          </h2>
+          <select
+            value={selectedCarId}
+            onChange={(e) => setSelectedCarId(e.target.value)}
+            className="bg-white/5 rounded-xl p-2 text-white border 
+              border-white/10 focus:border-blue-500/50 focus:outline-none"
+          >
+            <option value="all">All Cars</option>
+            {cars.map((car) => (
+              <option key={car._id} value={car._id}>
+                {car.make} {car.model} ({car.year})
+              </option>
+            ))}
+          </select>
+        </div>
+        <Link
+          to={`/dashboard/maintenance/add`}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white 
+            rounded-xl hover:bg-blue-600 transition-colors"
         >
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-lg font-medium">{record.maintenanceType}</h3>
-              <p className="text-gray-400 text-sm">
-                Scheduled: {new Date(record.dateScheduled).toLocaleDateString()}
-              </p>
-              {record.dateCompleted && (
-                <p className="text-gray-400 text-sm">
-                  Completed:{" "}
-                  {new Date(record.dateCompleted).toLocaleDateString()}
-                </p>
-              )}
-              {record.cost && (
-                <p className="text-gray-400 text-sm">Cost: ${record.cost}</p>
-              )}
-              {record.notes && (
-                <p className="text-gray-400 mt-2">{record.notes}</p>
-              )}
-            </div>
-            <div className="flex space-x-2">
-              <button
-                onClick={() => onAddToCalendar(record._id)}
-                className="p-2 text-sm bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-              >
-                Add to Calendar
-              </button>
-              <button
-                onClick={() => onEdit(record)}
-                className="p-2 text-sm bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => onDelete(record._id)}
-                className="p-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
-              >
-                Delete
-              </button>
+          Add Maintenance
+        </Link>
+      </div>
+
+      {maintenanceRecords.length === 0 ? (
+        <div className="text-center py-8 text-gray-400">
+          No maintenance records found
+        </div>
+      ) : (
+        maintenanceRecords.map((record) => (
+          <div
+            key={record._id}
+            className="bg-white/5 rounded-xl p-6 border border-white/10 
+              hover:border-white/20 transition-colors"
+          >
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-lg text-white font-medium">
+                  {record.maintenanceType}
+                </h3>
+                <div className="mt-2 space-y-1">
+                  <p className="text-sm text-gray-400 flex items-center gap-2">
+                    <ClockIcon className="w-4 h-4" />
+                    Scheduled:{" "}
+                    {new Date(record.dateScheduled).toLocaleDateString()}
+                  </p>
+                  {record.dateCompleted && (
+                    <p className="text-sm text-gray-400">
+                      Completed:{" "}
+                      {new Date(record.dateCompleted).toLocaleDateString()}
+                    </p>
+                  )}
+                  {record.cost && (
+                    <p className="text-sm text-gray-400">
+                      Cost: ${record.cost}
+                    </p>
+                  )}
+                </div>
+                {record.notes && (
+                  <p className="mt-3 text-sm text-gray-400">{record.notes}</p>
+                )}
+              </div>
+
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleAddToCalendar(record)}
+                  disabled={isLoading}
+                  className="p-2 text-gray-400 hover:text-blue-500 
+                    hover:bg-white/10 rounded-lg transition-colors"
+                  title="Add to Calendar"
+                >
+                  <CalendarIcon className="w-5 h-5" />
+                </button>
+                <Link
+                  to={`/dashboard/maintenance/update/${record._id}`}
+                  className="p-2 text-gray-400 hover:text-white 
+                    hover:bg-white/10 rounded-lg transition-colors"
+                  title="Edit"
+                >
+                  <PencilIcon className="w-5 h-5" />
+                </Link>
+                <button
+                  onClick={() => handleDelete(record._id)}
+                  className="p-2 text-gray-400 hover:text-red-500 
+                    hover:bg-white/10 rounded-lg transition-colors"
+                  title="Delete"
+                >
+                  <TrashIcon className="w-5 h-5" />
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+        ))
+      )}
     </div>
   )
 }
