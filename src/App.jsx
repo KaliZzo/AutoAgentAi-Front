@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute"
 import LoginPage from "./components/pages/LoginPage"
-import SignupPage from "./components/pages/SignUp"
+import SignupPage from "./components/pages/SignupPage"
 import TwoFactorAuthPage from "./components/pages/TwoFactorAuthPage"
-import DashboardPage from "./components/pages/Dashboard"
+import DashboardPage from "./components/pages/DashboardPage"
 import ForgotPasswordPage from "./components/pages/ForgotPasswordPage"
 import ResetPasswordPage from "./components/pages/ResetPasswordPage"
 
