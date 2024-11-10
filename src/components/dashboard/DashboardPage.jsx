@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react"
 import { Outlet, useLocation, Link } from "react-router-dom"
+import { carAPI, maintenanceAPI } from "../../api"
+import { toast } from "react-hot-toast"
 import Sidebar from "../dashboard/Sidebar"
 import TopBar from "../dashboard/TopBar"
 import MobileNavBar from "../dashboard/MobileNavBar"
@@ -8,11 +10,10 @@ import {
   WrenchScrewdriverIcon,
   ClockIcon,
   ChatBubbleLeftRightIcon,
-  PlusIcon,
   ArrowPathIcon,
+  PlusIcon,
   MapPinIcon,
 } from "@heroicons/react/24/outline"
-import { maintenanceAPI, carAPI } from "../../api"
 
 const DashboardPage = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -53,41 +54,6 @@ const DashboardPage = () => {
 
     fetchCars()
   }, [])
-
-  const quickActions = [
-    {
-      title: "My Cars",
-      description: "View and manage vehicles",
-      icon: <TruckIcon className="w-8 h-8" />,
-      link: "/dashboard/cars",
-      color:
-        "from-purple-500/20 to-purple-600/20 hover:from-purple-500/30 hover:to-purple-600/30",
-    },
-    {
-      title: "Schedule Maintenance",
-      description: "Add maintenance record",
-      icon: <WrenchScrewdriverIcon className="w-8 h-8" />,
-      link: "/dashboard/maintenance/add",
-      color:
-        "from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30",
-    },
-    {
-      title: "Maintenance History",
-      description: "View all records",
-      icon: <ClockIcon className="w-8 h-8" />,
-      link: "/dashboard/maintenance/all",
-      color:
-        "from-orange-500/20 to-orange-600/20 hover:from-orange-500/30 hover:to-orange-600/30",
-    },
-    {
-      title: "Find Nearby Garages",
-      description: "Search for garages",
-      icon: <MapPinIcon className="w-8 h-8" />,
-      link: "/dashboard/garages",
-      color:
-        "from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30",
-    },
-  ]
 
   const fetchRecentMaintenance = async (carId) => {
     try {
@@ -170,32 +136,40 @@ const DashboardPage = () => {
     )
   }
 
-  const handleChatSubmit = async (e) => {
-    e.preventDefault()
-    if (!chatMessage.trim() || !selectedCar) return
-
-    setIsChatLoading(true)
-    try {
-      const response = await fetch("/api/openai/response", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({
-          userMessage: chatMessage,
-          carId: selectedCar._id,
-        }),
-      })
-
-      const data = await response.json()
-      setChatResponse(data.response)
-    } catch (error) {
-      console.error("Chat error:", error)
-    } finally {
-      setIsChatLoading(false)
-    }
-  }
+  const quickActions = [
+    {
+      title: "My Cars",
+      description: "View and manage vehicles",
+      icon: <TruckIcon className="w-8 h-8" />,
+      link: "/dashboard/cars",
+      color:
+        "from-purple-500/20 to-purple-600/20 hover:from-purple-500/30 hover:to-purple-600/30",
+    },
+    {
+      title: "Schedule Maintenance",
+      description: "Add maintenance record",
+      icon: <WrenchScrewdriverIcon className="w-8 h-8" />,
+      link: "/dashboard/maintenance/add",
+      color:
+        "from-green-500/20 to-green-600/20 hover:from-green-500/30 hover:to-green-600/30",
+    },
+    {
+      title: "Maintenance History",
+      description: "View all records",
+      icon: <ClockIcon className="w-8 h-8" />,
+      link: "/dashboard/maintenance/all",
+      color:
+        "from-orange-500/20 to-orange-600/20 hover:from-orange-500/30 hover:to-orange-600/30",
+    },
+    {
+      title: "Find Nearby Garages",
+      description: "Search for garages",
+      icon: <MapPinIcon className="w-8 h-8" />,
+      link: "/dashboard/garages",
+      color:
+        "from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30",
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-black">
@@ -240,7 +214,7 @@ const DashboardPage = () => {
                         </div>
                       </div>
 
-                      {/* Car Actions */}
+                      {/* Car Actions - רק כפתור אחד */}
                       <div className="flex mt-8">
                         <button
                           onClick={() => setShowCarSelector(!showCarSelector)}
@@ -336,62 +310,19 @@ const DashboardPage = () => {
                             AI Assistant
                           </div>
                           <div className="text-sm text-white/60">
-                            {selectedCar
-                              ? `Ask me anything about your ${selectedCar.make} ${selectedCar.model}`
-                              : "Select a car to get started"}
+                            How can I help you with your car?
                           </div>
                         </div>
                       </div>
-
-                      {/* Chat Response */}
-                      {chatResponse && (
-                        <div className="mb-6 p-4 bg-white/5 rounded-xl border border-white/10">
-                          <p className="text-white/80 text-sm">
-                            {chatResponse}
-                          </p>
-                        </div>
-                      )}
-
-                      {/* Chat Input */}
-                      <form onSubmit={handleChatSubmit}>
-                        <div className="relative">
-                          <input
-                            type="text"
-                            value={chatMessage}
-                            onChange={(e) => setChatMessage(e.target.value)}
-                            placeholder={
-                              selectedCar
-                                ? "Ask me anything about your car..."
-                                : "Select a car first"
-                            }
-                            disabled={!selectedCar || isChatLoading}
-                            className="w-full bg-white/5 rounded-xl p-5 pr-16 text-white/80 
-                              text-sm placeholder-white/40 border border-white/10 
-                              focus:outline-none focus:border-blue-500/50 transition-colors
-                              disabled:opacity-50 disabled:cursor-not-allowed"
-                          />
-                          <button
-                            type="submit"
-                            disabled={
-                              !selectedCar ||
-                              !chatMessage.trim() ||
-                              isChatLoading
-                            }
-                            className="absolute right-2 top-1/2 -translate-y-1/2 
-                              p-3 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 
-                              transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            {isChatLoading ? (
-                              <div
-                                className="w-5 h-5 border-2 border-white/20 border-t-white/80 
-                                rounded-full animate-spin"
-                              />
-                            ) : (
-                              <ArrowPathIcon className="w-5 h-5 text-blue-500" />
-                            )}
-                          </button>
-                        </div>
-                      </form>
+                      <div>
+                        <input
+                          type="text"
+                          placeholder="Ask me anything about your car..."
+                          className="w-full bg-white/5 rounded-xl p-5 text-white/80 
+                            text-sm placeholder-white/40 border border-white/10 
+                            focus:outline-none focus:border-blue-500/50 transition-colors"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
