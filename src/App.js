@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-import { Toaster } from "react-hot-toast"
+import "react-toastify/dist/ReactToastify.css"
+import { ToastContainer } from "react-toastify"
 import PrivateRoute from "./components/PrivateRoute/PrivateRoute"
 import LoginPage from "./components/pages/LoginPage"
 import SignupPage from "./components/pages/SignUp"
@@ -22,10 +23,13 @@ import UpdateMaintenance from "./components/maintenance/UpdateMaintenance"
 // Import Google Auth Callback Component
 import GoogleAuthCallback from "./components/maintenance/GoogleAuthCallback"
 
+// Import Garage Search Component
+import GarageSearch from "./components/maps/GarageSearch"
+
 function App() {
   return (
     <Router>
-      <Toaster position="top-right" />
+      <ToastContainer position="top-right" />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<LoginPage />} />
@@ -57,9 +61,12 @@ function App() {
             path="maintenance/update/:maintenanceId"
             element={<UpdateMaintenance />}
           />
+
+          {/* Garages Route */}
+          <Route path="garages" element={<GarageSearch />} />
         </Route>
 
-        {/* Google Auth Callback Route - עדכון הנתיב להתאמה מדויקת */}
+        {/* Google Auth Callback Route */}
         <Route
           path="/api/v1/calendar/auth/callback"
           element={<GoogleAuthCallback />}

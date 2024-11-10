@@ -116,6 +116,7 @@ export const maintenanceAPI = {
                   timeZone: "Asia/Jerusalem",
                 },
                 tokens: tokensResponse.data,
+                tokens: tokensResponse.data,
               }
 
               // הוספת לוגים לדיבוג
@@ -171,7 +172,17 @@ export const googleCalendarAPI = {
 
 // Google Maps API calls
 export const googleMapsAPI = {
-  findNearbyGarages: (params) => api.get("/google-maps/garages", { params }),
+  findNearbyGarages: async (location) => {
+    const response = await api.get("/maps/garages", {
+      params: { location },
+    })
+    return response.data
+  },
+
+  getPlacePhoto: async (photoReference) => {
+    const response = await api.get(`/maps/photo/${photoReference}`)
+    return response.data
+  },
 }
 
 // OpenAI API calls
