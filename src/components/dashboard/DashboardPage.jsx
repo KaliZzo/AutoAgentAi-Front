@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Outlet, useLocation, Link } from "react-router-dom"
 import { carAPI, maintenanceAPI } from "../../api"
 import { toast } from "react-hot-toast"
@@ -25,6 +25,8 @@ const DashboardPage = () => {
   const [chatMessage, setChatMessage] = useState("")
   const [chatResponse, setChatResponse] = useState("")
   const [isChatLoading, setIsChatLoading] = useState(false)
+  const [messages, setMessages] = useState([])
+  const chatContainerRef = useRef(null)
   const location = useLocation()
 
   useEffect(() => {
@@ -170,7 +172,75 @@ const DashboardPage = () => {
         "from-red-500/20 to-red-600/20 hover:from-red-500/30 hover:to-red-600/30",
     },
   ]
-  //test
+
+  const handleChatSubmit = async (e) => {
+    e.preventDefault()
+    if (!chatMessage.trim() || !selectedCar || isChatLoading) return
+
+    setIsChatLoading(true)
+    const userQuestion = chatMessage
+    setChatMessage("")
+
+    setMessages((prev) => [
+      ...prev,
+      {
+        type: "user",
+        content: userQuestion,
+        timestamp: new Date().toISOString(),
+      },
+    ])
+
+    try {
+      const response = await fetch(
+        "http://localhost:5000/api/v1/autoagent/response",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userMessage: userQuestion,
+            carId: selectedCar._id,
+            make: selectedCar.make,
+            model: selectedCar.model,
+            year: selectedCar.year,
+          }),
+        }
+      )
+
+      const data = await response.json()
+
+      if (data.response) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            type: "assistant",
+            content: data.response,
+            timestamp: new Date().toISOString(),
+          },
+        ])
+      }
+    } catch (error) {
+      console.error("Chat error:", error)
+      setMessages((prev) => [
+        ...prev,
+        {
+          type: "error",
+          content: "Sorry, I couldn't process your request at this time.",
+          timestamp: new Date().toISOString(),
+        },
+      ])
+    } finally {
+      setIsChatLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight
+    }
+  }, [messages])
+
   return (
     <div className="min-h-screen bg-black">
       {/* Main Content */}
@@ -310,19 +380,91 @@ const DashboardPage = () => {
                             AI Assistant
                           </div>
                           <div className="text-sm text-white/60">
-                            How can I help you with your car?
+                            {selectedCar
+                              ? `Ask me anything about your ${selectedCar.make} ${selectedCar.model} ${selectedCar.year}`
+                              : "Select a car to start chatting"}
                           </div>
                         </div>
                       </div>
-                      <div>
+
+                      {/* Messages Container */}
+                      <div
+                        ref={chatContainerRef}
+                        className="space-y-4 mb-6 max-h-[400px] overflow-y-auto 
+                          scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent"
+                      >
+                        {messages.map((message, index) => (
+                          <div
+                            key={index}
+                            className={`p-4 rounded-xl ${
+                              message.type === "user"
+                                ? "bg-blue-500/10 ml-12"
+                                : message.type === "assistant"
+                                ? "bg-white/5 mr-12"
+                                : "bg-red-500/10 mr-12"
+                            }`}
+                          >
+                            <div className="flex items-start gap-3">
+                              {message.type === "assistant" && (
+                                <div
+                                  className="w-8 h-8 bg-blue-500/10 rounded-full 
+                                  flex items-center justify-center flex-shrink-0"
+                                >
+                                  <ChatBubbleLeftRightIcon className="w-4 h-4 text-blue-500" />
+                                </div>
+                              )}
+                              <div>
+                                <p className="text-sm text-white/80 whitespace-pre-wrap">
+                                  {message.content}
+                                </p>
+                                <span className="text-xs text-white/40 mt-1 block">
+                                  {new Date(
+                                    message.timestamp
+                                  ).toLocaleTimeString()}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        {isChatLoading && (
+                          <div className="flex justify-center">
+                            <div
+                              className="w-8 h-8 border-4 border-blue-500/20 border-t-blue-500 
+                              rounded-full animate-spin"
+                            ></div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Chat Input */}
+                      <form onSubmit={handleChatSubmit} className="relative">
                         <input
                           type="text"
-                          placeholder="Ask me anything about your car..."
-                          className="w-full bg-white/5 rounded-xl p-5 text-white/80 
+                          value={chatMessage}
+                          onChange={(e) => setChatMessage(e.target.value)}
+                          placeholder={
+                            selectedCar
+                              ? "Ask me anything about your car..."
+                              : "Select a car to start chatting"
+                          }
+                          disabled={!selectedCar || isChatLoading}
+                          className="w-full bg-white/5 rounded-xl p-5 pr-16 text-white/80 
                             text-sm placeholder-white/40 border border-white/10 
-                            focus:outline-none focus:border-blue-500/50 transition-colors"
+                            focus:outline-none focus:border-blue-500/50 transition-colors
+                            disabled:opacity-50 disabled:cursor-not-allowed"
                         />
-                      </div>
+                        <button
+                          type="submit"
+                          disabled={
+                            !selectedCar || !chatMessage.trim() || isChatLoading
+                          }
+                          className="absolute right-2 top-1/2 -translate-y-1/2 
+                            p-3 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 
+                            transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <ArrowPathIcon className="w-5 h-5 text-blue-500" />
+                        </button>
+                      </form>
                     </div>
                   </div>
                 </div>

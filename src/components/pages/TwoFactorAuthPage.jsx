@@ -45,6 +45,11 @@ const TwoFactorAuthPage = () => {
     setError("")
     setLoading(true)
 
+    console.log("Submitting 2FA with:", {
+      userId: userData?.userId,
+      code: verificationCode,
+    })
+
     if (!userData?.userId) {
       setError("User data is missing")
       setLoading(false)
@@ -57,35 +62,11 @@ const TwoFactorAuthPage = () => {
         code: verificationCode,
       })
 
-      console.log("2FA Response:", response.data)
+      console.log("2FA verification response:", response.data)
 
-      if (response.data && response.data.user) {
-        // Store the complete user object
-        const userToStore = {
-          id: response.data.user.id,
-          username: response.data.user.username,
-          email: response.data.user.email,
-        }
-
-        // Clear any existing data
-        localStorage.removeItem("user")
-
-        // Store new user data
-        localStorage.setItem("user", JSON.stringify(userToStore))
-
-        // Verify the data was stored
-        const storedData = localStorage.getItem("user")
-        console.log("Stored user data:", storedData)
-
-        // Navigate after confirming data is stored
-        if (storedData) {
-          navigate("/dashboard", { replace: true })
-        } else {
-          throw new Error("Failed to store user data")
-        }
-      } else {
-        throw new Error("Invalid response data")
-      }
+      // Store user data and redirect
+      localStorage.setItem("user", JSON.stringify(response.data.user))
+      navigate("/dashboard", { replace: true })
     } catch (error) {
       console.error("Verification error:", error)
       setError(error.response?.data?.message || "Verification failed")
