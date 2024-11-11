@@ -86,142 +86,150 @@ const AddMaintenance = () => {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <Link
-        to="/dashboard/cars"
-        className="flex items-center gap-2 text-white/60 hover:text-white mb-8 group"
-      >
-        <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-        Back to Cars
-      </Link>
+    <div className="min-h-screen bg-[#0A0A0A] pt-16">
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        <Link
+          to="/dashboard"
+          className="flex items-center gap-2 text-white/60 hover:text-white mb-8 group"
+        >
+          <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          Back to Dashboard
+        </Link>
 
-      <h2 className="text-2xl text-white font-light mb-8">
-        Add Maintenance Record
-      </h2>
+        <h2 className="text-2xl text-white font-light mb-8">
+          Add Maintenance Record
+        </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Car Selection */}
-        <div>
-          <label className="block text-sm text-white/60 mb-2">Select Car</label>
-          <select
-            name="carId"
-            value={formData.carId}
-            onChange={handleChange}
-            className="w-full bg-white/5 rounded-xl p-3 text-white border 
-              border-white/10 focus:border-blue-500/50 focus:outline-none"
-            required
-          >
-            <option value="">Choose a car...</option>
-            {availableCars.map((car) => (
-              <option key={car._id} value={car._id}>
-                {car.make} {car.model} ({car.year})
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Car Selection */}
+          <div>
+            <label className="block text-sm text-white/60 mb-2">
+              Select Car
+            </label>
+            <select
+              name="carId"
+              value={formData.carId}
+              onChange={handleChange}
+              className="w-full bg-white/5 rounded-xl p-3 text-white border 
+                border-white/10 focus:border-blue-500/50 focus:outline-none"
+              required
+            >
+              <option value="" className="bg-[#0A0A0A]">
+                Choose a car...
               </option>
-            ))}
-          </select>
-        </div>
+              {availableCars.map((car) => (
+                <option key={car._id} value={car._id} className="bg-[#0A0A0A]">
+                  {car.make} {car.model} ({car.year})
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Maintenance Type */}
-        <div>
-          <label className="block text-sm text-white/60 mb-2">
-            Maintenance Type *
-          </label>
-          <input
-            type="text"
-            name="maintenanceType"
-            value={formData.maintenanceType}
-            onChange={handleChange}
-            className="w-full bg-white/5 rounded-xl p-3 text-white border 
-              border-white/10 focus:border-blue-500/50 focus:outline-none"
-            required
-            placeholder="e.g., Oil Change, Brake Service, Tire Rotation"
-          />
-        </div>
+          {/* Maintenance Type */}
+          <div>
+            <label className="block text-sm text-white/60 mb-2">
+              Maintenance Type *
+            </label>
+            <input
+              type="text"
+              name="maintenanceType"
+              value={formData.maintenanceType}
+              onChange={handleChange}
+              className="w-full bg-white/5 rounded-xl p-3 text-white border 
+                border-white/10 focus:border-blue-500/50 focus:outline-none"
+              required
+              placeholder="e.g., Oil Change, Brake Service, Tire Rotation"
+            />
+          </div>
 
-        {/* Scheduled Date */}
-        <div>
-          <label className="block text-sm text-white/60 mb-2">
-            Scheduled Date *
-          </label>
-          <input
-            type="date"
-            name="dateScheduled"
-            value={formData.dateScheduled}
-            onChange={handleChange}
-            className="w-full bg-white/5 rounded-xl p-3 text-white border 
-              border-white/10 focus:border-blue-500/50 focus:outline-none"
-            required
-          />
-        </div>
+          {/* Scheduled Date */}
+          <div>
+            <label className="block text-sm text-white/60 mb-2">
+              Scheduled Date *
+            </label>
+            <input
+              type="date"
+              name="dateScheduled"
+              value={formData.dateScheduled}
+              onChange={handleChange}
+              className="w-full bg-white/5 rounded-xl p-3 text-white border 
+                border-white/10 focus:border-blue-500/50 focus:outline-none
+                [color-scheme:dark]"
+              required
+            />
+          </div>
 
-        {/* Completion Date */}
-        <div>
-          <label className="block text-sm text-white/60 mb-2">
-            Completion Date (Optional)
-          </label>
-          <input
-            type="date"
-            name="dateCompleted"
-            value={formData.dateCompleted}
-            onChange={handleChange}
-            className="w-full bg-white/5 rounded-xl p-3 text-white border 
-              border-white/10 focus:border-blue-500/50 focus:outline-none"
-          />
-        </div>
+          {/* Completion Date */}
+          <div>
+            <label className="block text-sm text-white/60 mb-2">
+              Completion Date (Optional)
+            </label>
+            <input
+              type="date"
+              name="dateCompleted"
+              value={formData.dateCompleted}
+              onChange={handleChange}
+              className="w-full bg-white/5 rounded-xl p-3 text-white border 
+                border-white/10 focus:border-blue-500/50 focus:outline-none
+                [color-scheme:dark]"
+            />
+          </div>
 
-        {/* Cost */}
-        <div>
-          <label className="block text-sm text-white/60 mb-2">
-            Cost (Optional)
-          </label>
-          <input
-            type="number"
-            name="cost"
-            value={formData.cost}
-            onChange={handleChange}
-            className="w-full bg-white/5 rounded-xl p-3 text-white border 
-              border-white/10 focus:border-blue-500/50 focus:outline-none"
-            placeholder="Enter cost in dollars"
-            min="0"
-            step="0.01"
-          />
-        </div>
+          {/* Cost */}
+          <div>
+            <label className="block text-sm text-white/60 mb-2">
+              Cost (Optional)
+            </label>
+            <input
+              type="number"
+              name="cost"
+              value={formData.cost}
+              onChange={handleChange}
+              className="w-full bg-white/5 rounded-xl p-3 text-white border 
+                border-white/10 focus:border-blue-500/50 focus:outline-none"
+              placeholder="Enter cost in dollars"
+              min="0"
+              step="0.01"
+            />
+          </div>
 
-        {/* Notes */}
-        <div>
-          <label className="block text-sm text-white/60 mb-2">
-            Notes (Optional)
-          </label>
-          <textarea
-            name="notes"
-            value={formData.notes}
-            onChange={handleChange}
-            className="w-full bg-white/5 rounded-xl p-3 text-white border 
-              border-white/10 focus:border-blue-500/50 focus:outline-none"
-            rows="3"
-            placeholder="Add any additional notes or details"
-          />
-        </div>
+          {/* Notes */}
+          <div>
+            <label className="block text-sm text-white/60 mb-2">
+              Notes (Optional)
+            </label>
+            <textarea
+              name="notes"
+              value={formData.notes}
+              onChange={handleChange}
+              className="w-full bg-white/5 rounded-xl p-3 text-white border 
+                border-white/10 focus:border-blue-500/50 focus:outline-none"
+              rows="3"
+              placeholder="Add any additional notes or details"
+            />
+          </div>
 
-        {/* Submit Buttons */}
-        <div className="flex gap-4 pt-4">
-          <button
-            type="button"
-            onClick={() => navigate("/dashboard/cars")}
-            className="flex-1 bg-white/5 text-white py-3 rounded-xl 
-              hover:bg-white/10 transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 
-              rounded-xl transition-colors disabled:opacity-50"
-          >
-            {isLoading ? "Adding..." : "Add Maintenance"}
-          </button>
-        </div>
-      </form>
+          {/* Submit Buttons */}
+          <div className="flex gap-4 pt-4">
+            <button
+              type="button"
+              onClick={() => navigate("/dashboard/maintenance")}
+              className="flex-1 bg-white/5 text-white py-3 rounded-xl 
+                hover:bg-white/10 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 
+                rounded-xl transition-colors disabled:opacity-50"
+            >
+              {isLoading ? "Adding..." : "Add Maintenance"}
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   )
 }

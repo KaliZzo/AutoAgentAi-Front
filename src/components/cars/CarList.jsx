@@ -2,7 +2,12 @@ import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { carAPI } from "../../api"
 import { toast } from "react-hot-toast"
-import { PlusIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline"
+import {
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  ArrowLeftIcon,
+} from "@heroicons/react/24/outline"
 
 const CarList = () => {
   const [cars, setCars] = useState([])
@@ -34,6 +39,14 @@ const CarList = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      <Link
+        to="/dashboard"
+        className="flex items-center gap-2 text-white/60 hover:text-white mb-8 group"
+      >
+        <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+        Back to Dashboard
+      </Link>
+
       <div className="flex justify-between items-center mb-8">
         <h2 className="text-2xl text-white font-light">My Cars</h2>
         <Link

@@ -34,7 +34,7 @@ const TopBar = ({ onMenuClick }) => {
     >
       <div className="h-full px-4 flex items-center justify-between max-w-7xl mx-auto">
         {/* Left Side */}
-        <div className="flex items-center">
+        <div className="flex items-center space-x-4">
           <button
             onClick={onMenuClick}
             className="lg:hidden p-2 rounded-xl text-gray-400 
@@ -42,25 +42,16 @@ const TopBar = ({ onMenuClick }) => {
           >
             <Bars3Icon className="h-6 w-6" />
           </button>
+
+          {/* Added AutoAgent Logo/Text */}
+          <h1 className="text-2xl font-bold text-white tracking-wider">
+            AutoAgent
+          </h1>
         </div>
 
         {/* Right Side */}
         <div className="flex items-center space-x-4">
           {/* Calendar Integration */}
-          <button
-            className="p-2 rounded-xl text-gray-400 hover:bg-white/5 
-            hover:text-white transition-colors"
-          >
-            <CalendarDaysIcon className="h-6 w-6" />
-          </button>
-
-          {/* Notifications */}
-          <button
-            className="p-2 rounded-xl text-gray-400 hover:bg-white/5 
-            hover:text-white transition-colors"
-          >
-            <BellIcon className="h-6 w-6" />
-          </button>
 
           {/* Logout Button */}
           <button

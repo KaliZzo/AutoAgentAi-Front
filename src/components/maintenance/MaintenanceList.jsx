@@ -5,6 +5,7 @@ import {
   TrashIcon,
   CalendarIcon,
   ClockIcon,
+  ArrowLeftIcon,
 } from "@heroicons/react/24/outline"
 import { toast } from "react-hot-toast"
 import { maintenanceAPI } from "../../api"
@@ -86,105 +87,124 @@ const MaintenanceList = () => {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl text-white font-light">
-            Maintenance Records
-          </h2>
-          <select
-            value={selectedCarId}
-            onChange={(e) => setSelectedCarId(e.target.value)}
-            className="bg-white/5 rounded-xl p-2 text-white border 
-              border-white/10 focus:border-blue-500/50 focus:outline-none"
-          >
-            <option value="all">All Cars</option>
-            {cars.map((car) => (
-              <option key={car._id} value={car._id}>
-                {car.make} {car.model} ({car.year})
-              </option>
-            ))}
-          </select>
-        </div>
+    <div className="min-h-screen bg-[#0A0A0A] pt-16">
+      <div className="max-w-7xl mx-auto px-4 py-8">
         <Link
-          to={`/dashboard/maintenance/add`}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white 
-            rounded-xl hover:bg-blue-600 transition-colors"
+          to="/dashboard"
+          className="flex items-center gap-2 text-white/60 hover:text-white mb-8 group"
         >
-          Add Maintenance
+          <ArrowLeftIcon className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+          Back to Dashboard
         </Link>
-      </div>
-
-      {maintenanceRecords.length === 0 ? (
-        <div className="text-center py-8 text-gray-400">
-          No maintenance records found
-        </div>
-      ) : (
-        maintenanceRecords.map((record) => (
-          <div
-            key={record._id}
-            className="bg-white/5 rounded-xl p-6 border border-white/10 
-              hover:border-white/20 transition-colors"
-          >
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="text-lg text-white font-medium">
-                  {record.maintenanceType}
-                </h3>
-                <div className="mt-2 space-y-1">
-                  <p className="text-sm text-gray-400 flex items-center gap-2">
-                    <ClockIcon className="w-4 h-4" />
-                    Scheduled:{" "}
-                    {new Date(record.dateScheduled).toLocaleDateString()}
-                  </p>
-                  {record.dateCompleted && (
-                    <p className="text-sm text-gray-400">
-                      Completed:{" "}
-                      {new Date(record.dateCompleted).toLocaleDateString()}
-                    </p>
-                  )}
-                  {record.cost && (
-                    <p className="text-sm text-gray-400">
-                      Cost: ${record.cost}
-                    </p>
-                  )}
-                </div>
-                {record.notes && (
-                  <p className="mt-3 text-sm text-gray-400">{record.notes}</p>
-                )}
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleAddToCalendar(record)}
-                  disabled={isLoading}
-                  className="p-2 text-gray-400 hover:text-blue-500 
-                    hover:bg-white/10 rounded-lg transition-colors"
-                  title="Add to Calendar"
-                >
-                  <CalendarIcon className="w-5 h-5" />
-                </button>
-                <Link
-                  to={`/dashboard/maintenance/update/${record._id}`}
-                  className="p-2 text-gray-400 hover:text-white 
-                    hover:bg-white/10 rounded-lg transition-colors"
-                  title="Edit"
-                >
-                  <PencilIcon className="w-5 h-5" />
-                </Link>
-                <button
-                  onClick={() => handleDelete(record._id)}
-                  className="p-2 text-gray-400 hover:text-red-500 
-                    hover:bg-white/10 rounded-lg transition-colors"
-                  title="Delete"
-                >
-                  <TrashIcon className="w-5 h-5" />
-                </button>
-              </div>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-4">
+              <h2 className="text-2xl text-white font-light">
+                Maintenance Records
+              </h2>
+              <select
+                value={selectedCarId}
+                onChange={(e) => setSelectedCarId(e.target.value)}
+                className="bg-white/5 rounded-xl p-2 text-white border 
+                  border-white/10 focus:border-blue-500/50 focus:outline-none"
+              >
+                <option value="all" className="bg-[#0A0A0A]">
+                  All Cars
+                </option>
+                {cars.map((car) => (
+                  <option
+                    key={car._id}
+                    value={car._id}
+                    className="bg-[#0A0A0A]"
+                  >
+                    {car.make} {car.model} ({car.year})
+                  </option>
+                ))}
+              </select>
             </div>
+            <Link
+              to={`/dashboard/maintenance/add`}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white 
+                rounded-xl hover:bg-blue-600 transition-colors"
+            >
+              Add Maintenance
+            </Link>
           </div>
-        ))
-      )}
+
+          {maintenanceRecords.length === 0 ? (
+            <div className="text-center py-8 text-white/60">
+              No maintenance records found
+            </div>
+          ) : (
+            maintenanceRecords.map((record) => (
+              <div
+                key={record._id}
+                className="bg-white/5 rounded-xl p-6 border border-white/10 
+                  hover:border-white/20 transition-colors"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-lg text-white font-medium">
+                      {record.maintenanceType}
+                    </h3>
+                    <div className="mt-2 space-y-1">
+                      <p className="text-sm text-white/60 flex items-center gap-2">
+                        <ClockIcon className="w-4 h-4" />
+                        Scheduled:{" "}
+                        {new Date(record.dateScheduled).toLocaleDateString()}
+                      </p>
+                      {record.dateCompleted && (
+                        <p className="text-sm text-white/60">
+                          Completed:{" "}
+                          {new Date(record.dateCompleted).toLocaleDateString()}
+                        </p>
+                      )}
+                      {record.cost && (
+                        <p className="text-sm text-white/60">
+                          Cost: ${record.cost}
+                        </p>
+                      )}
+                    </div>
+                    {record.notes && (
+                      <p className="mt-3 text-sm text-white/60">
+                        {record.notes}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleAddToCalendar(record)}
+                      disabled={isLoading}
+                      className="p-2 text-gray-400 hover:text-blue-500 
+                        hover:bg-white/10 rounded-lg transition-colors"
+                      title="Add to Calendar"
+                    >
+                      <CalendarIcon className="w-5 h-5" />
+                    </button>
+                    <Link
+                      to={`/dashboard/maintenance/update/${record._id}`}
+                      className="p-2 text-gray-400 hover:text-white 
+                        hover:bg-white/10 rounded-lg transition-colors"
+                      title="Edit"
+                    >
+                      <PencilIcon className="w-5 h-5" />
+                    </Link>
+                    <button
+                      onClick={() => handleDelete(record._id)}
+                      className="p-2 text-gray-400 hover:text-red-500 
+                        hover:bg-white/10 rounded-lg transition-colors"
+                      title="Delete"
+                    >
+                      <TrashIcon className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
     </div>
   )
 }
