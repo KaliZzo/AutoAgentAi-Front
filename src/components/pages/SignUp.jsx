@@ -25,7 +25,6 @@ const SignUpPage = () => {
     e.preventDefault()
     setError("")
 
-    // Validate terms acceptance
     if (!termsAccepted) {
       setError("Please accept the Terms of Service and Privacy Policy")
       return
@@ -40,21 +39,21 @@ const SignUpPage = () => {
         password: formData.password,
       })
 
-      // Store token and user data
-      localStorage.setItem("token", response.data.user.token)
-      localStorage.setItem("user", JSON.stringify(response.data.user))
+      console.log("Signup response:", response.data)
 
-      // Clear form
-      setFormData({
-        username: "",
-        email: "",
-        password: "",
-      })
+      if (response.data.token) {
+        localStorage.setItem("token", response.data.token)
+      } else if (response.data.user?.token) {
+        localStorage.setItem("token", response.data.user.token)
+      } else {
+        console.error("No token found in response:", response.data)
+      }
 
-      // Redirect to dashboard
+      console.log("Saved token:", localStorage.getItem("token"))
+
       navigate("/dashboard")
     } catch (error) {
-      console.error("Signup error:", error)
+      console.error("Full signup error:", error)
       setError(error.response?.data?.message || "Failed to create account")
     } finally {
       setLoading(false)

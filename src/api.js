@@ -29,9 +29,27 @@ api.interceptors.response.use(
 
 // Auth API calls
 export const authAPI = {
-  login: (credentials) => api.post("/login", credentials),
+  login: async (credentials) => {
+    const response = await api.post("/login", credentials)
+    if (response.data.token) {
+      localStorage.setItem("token", response.data.token)
+    }
+    return response
+  },
   logout: () => api.post("/logout"),
-  signup: (userData) => api.post("/signup", userData),
+  signup: async (userData) => {
+    const response = await api.post("/signup", userData)
+    console.log("API signup response:", response.data)
+
+    // טיפול בשני המקרים האפשריים
+    const token = response.data.token || response.data.user?.token
+    if (token) {
+      localStorage.setItem("token", token)
+    } else {
+      console.error("No token found in response")
+    }
+    return response
+  },
   request2FA: (userId) => api.post("/request-2fa", { userId }),
   verify2FA: (data) => api.post("/verify-2fa", data),
   forgotPassword: (email) => api.post("/forgot-password", { email }),
